@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>One Moon, Two Hearts — A Karwa Chauth Surprise 🌙</title>
+  <meta name="description" content="A romantic interactive Karwa Chauth experience celebrating love across distances. One moon, two hearts.">
+  <meta name="theme-color" content="#100D20">
+
+  <!-- Google Fonts Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Marck+Script&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       PROJECT NEZUMI: ONE MOON, TWO HEARTS
+       Theme & Variables
+       ========================================================================== */
+    :root {
+      --c-midnight: #100D20;
+      --c-plum: #25182F;
+      --c-plum-dark: #191022;
+      --c-sakura: #FF9ECB;
+      --c-sakura-soft: #FFD1E3;
+      --c-sakura-deep: #D81B60;
+      --c-gold: #FFD68A;
+      --c-gold-bright: #FFE8A3;
+      --c-gold-deep: #D4AF37;
+      --c-ivory: #FFF4E8;
+      --c-ivory-muted: #E2D5C8;
+      --c-water: #70D6FF;
+      --c-water-glow: #A0E7E5;
+      --c-glass: rgba(37, 24, 47, 0.72);
+      --c-glass-border: rgba(255, 214, 138, 0.32);
+      --c-glass-card: rgba(25, 16, 34, 0.85);
+
+      --font-display: 'Cinzel', Georgia, serif;
+      --font-script: 'Marck Script', cursive;
+      --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+      --transition-smooth: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-bounce: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      --shadow-glow-gold: 0 0 35px rgba(255, 214, 138, 0.4);
+      --shadow-glow-sakura: 0 0 35px rgba(255, 158, 203, 0.4);
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--c-midnight);
+      color: var(--c-ivory);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    body {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-bottom: 60px;
+    }
+
+    /* Screen reader only utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ==========================================================================
+       Canvas Ambient Background (Stars, Petals, Lightning, Particles)
+       ========================================================================== */
+    #ambient-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Background vignette & glow */
+    .bg-vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 214, 138, 0.08) 0%, rgba(37, 24, 47, 0.4) 60%, rgba(16, 13, 32, 0.95) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       Header / HUD Controls (Progress Dots & Ambient Audio Toggle)
+       ========================================================================== */
+    .hud-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      background: linear-gradient(180deg, rgba(16, 13, 32, 0.88) 0%, rgba(16, 13, 32, 0) 100%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.9;
+    }
+
+    .brand-title .sparkle {
+      font-size: 1rem;
+      animation: pulse-soft 2s infinite ease-in-out;
+    }
+
+    .scene-indicators {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(37, 24, 47, 0.65);
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 214, 138, 0.22);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .scene-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(255, 244, 232, 0.25);
+      cursor: pointer;
+      border: 1px solid rgba(255, 214, 138, 0.3);
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .scene-dot.active {
+      background: var(--c-sakura);
+      box-shadow: 0 0 12px var(--c-sakura), 0 0 20px var(--c-gold);
+      transform: scale(1.4);
+      border-color: var(--c-gold-bright);
+    }
+
+    .scene-dot.visited:not(.active) {
+      background: var(--c-gold);
+      opacity: 0.7;
+    }
+
+    .scene-dot:focus-visible {
+      outline: 2px solid var(--c-gold);
+      outline-offset: 3px;
+    }
+
+    .hud-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hud-btn {
+      background: rgba(37, 24, 47, 0.7);
+      border: 1px solid rgba(255, 214, 138, 0.35);
+      color: var(--c-ivory);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      font-size: 0.95rem;
+    }
+
+    .hud-btn:hover {
+      background: rgba(255, 158, 203, 0.2);
+      border-color: var(--c-sakura);
+      transform: scale(1.08);
+      box-shadow: 0 0 15px rgba(255, 158, 203, 0.3);
+    }
+
+    .hud-btn.active {
+      background: var(--c-sakura-deep);
+      border-color: var(--c-gold);
+      color: #fff;
+    }
+
+    /* ==========================================================================
+       Main Experience Container & Scenes
+       ========================================================================== */
+    .experience-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 820px;
+      min-height: calc(100vh - 65px);
+      margin-top: 65px;
+      padding: 20px 20px 60px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scene {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .scene.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================================================
+       Typography Styles
+       ========================================================================== */
+    .pre-heading {
+      font-family: var(--font-script);
+      font-size: 1.55rem;
+      color: var(--c-sakura);
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 12px rgba(255, 158, 203, 0.4);
+    }
+
+    .scene-title {
+      font-family: var(--font-display);
+      font-size: 2.35rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #FFF4E8 20%, #FFD68A 65%, #FF9ECB 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 20px rgba(255, 214, 138, 0.25);
+    }
+
+    .scene-subtitle {
+      font-size: 1.15rem;
+      color: var(--c-ivory-muted);
+      max-width: 580px;
+      margin: 0 auto 24px auto;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    .scene-note {
+      font-family: var(--font-script);
+      font-size: 1.25rem;
+      color: var(--c-gold);
+      margin-bottom: 28px;
+      opacity: 0.95;
+    }
+
+    /* ==========================================================================
+       Interactive Button Styles
+       ========================================================================== */
+    .btn-romantic {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 36px;
+      font-family: var(--font-display);
+      font-size: 0.98rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-midnight);
+      background: linear-gradient(135deg, #FFD68A 0%, #FFB6D3 50%, #FFD68A 100%);
+      background-size: 200% 200%;
+      border: 1px solid rgba(255, 244, 232, 0.85);
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 25px rgba(255, 214, 138, 0.35), 0 0 40px rgba(255, 158, 203, 0.25);
+      transition: var(--transition-smooth);
+      animation: gradient-shimmer 4s ease infinite;
+      text-decoration: none;
+      z-index: 2;
+    }
+
+    .btn-romantic::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 52px;
+      background: linear-gradient(135deg, #FFD68A, #FF9ECB, #FFD68A);
+      z-index: -1;
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-romantic:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 35px rgba(255, 214, 138, 0.5), 0 0 50px rgba(255, 158, 203, 0.4);
+      color: #0c0818;
+    }
+
+    .btn-romantic:hover::before {
+      opacity: 1;
+    }
+
+    .btn-romantic:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .btn-romantic:focus-visible {
+      outline: 3px solid var(--c-gold-bright);
+      outline-offset: 4px;
+    }
+
+    .btn-secondary {
+      background: rgba(37, 24, 47, 0.7);
+      border: 1px solid var(--c-glass-border);
+      color: var(--c-ivory);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 158, 203, 0.15);
+      border-color: var(--c-sakura);
+      color: var(--c-ivory);
+      box-shadow: 0 6px 25px rgba(255, 158, 203, 0.3);
+    }
+
+    /* Water Pulse Button Special */
+    .btn-water-pulse {
+      position: relative;
+      background: linear-gradient(135deg, #FFD68A 0%, #FF9ECB 50%, #70D6FF 100%);
+      font-size: 1.05rem;
+      padding: 18px 42px;
+      animation: water-pulse 2.2s infinite ease-in-out;
+    }
+
+    .btn-water-pulse::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50px;
+      top: 0;
+      left: 0;
+      border: 2px solid var(--c-water);
+      opacity: 0.6;
+      animation: water-ripple-expand 2.2s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
+      pointer-events: none;
+    }
+
+    /* Glass Panels */
+    .glass-card {
+      background: var(--c-glass-card);
+      border: 1px solid var(--c-glass-border);
+      border-radius: 24px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.45), 0 0 30px rgba(255, 214, 138, 0.08);
+      padding: 38px 32px;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       SCENE 1: THE MOONLIT ENTRANCE
+       ========================================================================== */
+    .entrance-moon-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 15px auto 30px auto;
+      animation: moon-rise-entrance 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .celestial-moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #FFFDF7 0%, #FFF3D6 40%, #FFD68A 75%, #E6B55C 100%);
+      box-shadow: 0 0 50px rgba(255, 214, 138, 0.65), 0 0 100px rgba(255, 214, 138, 0.35), inset -15px -15px 40px rgba(180, 130, 45, 0.3);
+      position: relative;
+      animation: moon-float 6s infinite ease-in-out;
+    }
+
+    .moon-crater {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(212, 168, 86, 0.18);
+      box-shadow: inset 2px 2px 4px rgba(160, 120, 50, 0.25);
+    }
+    .crater-1 { width: 34px; height: 34px; top: 25%; left: 30%; }
+    .crater-2 { width: 22px; height: 22px; top: 55%; left: 25%; }
+    .crater-3 { width: 45px; height: 45px; top: 40%; left: 60%; }
+    .crater-4 { width: 16px; height: 16px; top: 68%; left: 55%; }
+
+    .moon-glow-aura {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 214, 138, 0.3) 0%, rgba(255, 158, 203, 0.15) 50%, transparent 75%);
+      animation: aura-expand 4s infinite alternate ease-in-out;
+      pointer-events: none;
+    }
+
+    .staged-reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .staged-reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================================================
+       SCENE 2: THE VIRTUAL CHANNI RITUAL
+       ========================================================================== */
+    .channi-stage {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 380px;
+      margin: 10px auto 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .channi-moon-bg {
+      position: absolute;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #FFFDF7 0%, #FFF3D6 45%, #FFD68A 80%, #D4AF37 100%);
+      box-shadow: 0 0 60px rgba(255, 214, 138, 0.5);
+      z-index: 2;
+      transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .channi-moon-bg.burst {
+      box-shadow: 0 0 100px rgba(255, 214, 138, 0.95), 0 0 180px rgba(255, 158, 203, 0.6);
+      transform: scale(1.15);
+    }
+
+    /* Channi Interactive Component */
+    .channi-interactive {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      z-index: 10;
+      cursor: pointer;
+      transition: transform 1.4s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 1.2s ease;
+      touch-action: manipulation;
+    }
+
+    .channi-interactive:focus-visible {
+      outline: 3px solid var(--c-gold);
+      outline-offset: 8px;
+      border-radius: 50%;
+    }
+
+    .channi-interactive.lifted {
+      transform: translateY(-200px) rotate(-16deg) scale(0.9);
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    .tap-hint-pill {
+      position: absolute;
+      bottom: -15px;
+      background: rgba(16, 13, 32, 0.88);
+      border: 1px solid var(--c-gold);
+      color: var(--c-gold-bright);
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      animation: bounce-subtle 1.8s infinite;
+      pointer-events: none;
+      z-index: 12;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Diya Component */
+    .diya-container {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 11;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .diya-flame {
+      width: 14px;
+      height: 26px;
+      background: radial-gradient(ellipse at bottom, #FFFAEA 0%, #FFD54F 35%, #FF7043 75%, transparent 100%);
+      border-radius: 50% 50% 25% 25% / 70% 70% 30% 30%;
+      animation: flame-flicker 1.4s infinite alternate ease-in-out;
+      filter: drop-shadow(0 0 14px #FFA726) drop-shadow(0 0 28px #FF7043);
+      transform-origin: bottom center;
+      margin-bottom: -4px;
+    }
+
+    .diya-bowl {
+      width: 58px;
+      height: 22px;
+      background: linear-gradient(180deg, #A0522D 0%, #6E260E 80%, #3E1405 100%);
+      border-radius: 0 0 50px 50px;
+      border: 1px solid rgba(255, 214, 138, 0.4);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .diya-bowl::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: 5px;
+      right: 5px;
+      height: 5px;
+      background: #D48842;
+      border-radius: 50%;
+    }
+
+    /* ==========================================================================
+       SCENE 3: FROM MY HEART TO YOURS (PARCHMENT LETTER)
+       ========================================================================== */
+    .letter-parchment {
+      background: #FFF7ED;
+      color: #382513;
+      border-radius: 20px;
+      padding: 44px 36px;
+      max-width: 660px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 40px rgba(255, 214, 138, 0.25);
+      position: relative;
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .letter-corner-gold {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border: 2px solid #D4AF37;
+      pointer-events: none;
+    }
+
+    .corner-tl { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+    .corner-tr { top: 12px; right: 12px; border-left: none; border-bottom: none; }
+    .corner-bl { bottom: 12px; left: 12px; border-right: none; border-top: none; }
+    .corner-br { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+
+    .letter-salutation {
+      font-family: var(--font-script);
+      font-size: 2.2rem;
+      color: #8C2442;
+      margin-bottom: 22px;
+      line-height: 1.25;
+    }
+
+    .letter-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      margin-bottom: 18px;
+      color: #4A3322;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .letter-paragraph.shown {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .letter-paragraph:last-of-type {
+      margin-bottom: 26px;
+      font-weight: 600;
+      color: #7A1D37;
+    }
+
+    .letter-candle-glow {
+      position: absolute;
+      bottom: -40px;
+      right: -40px;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(255, 183, 77, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       SCENE 4: MUSIC / NEW SONG ADDED IN APP NEZUMI
+       ========================================================================== */
+    .nezumi-app-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, rgba(255, 158, 203, 0.22), rgba(255, 214, 138, 0.28));
+      border: 1px solid rgba(255, 214, 138, 0.55);
+      border-radius: 30px;
+      padding: 7px 20px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--c-gold-bright);
+      text-transform: uppercase;
+      box-shadow: 0 4px 22px rgba(255, 158, 203, 0.35);
+      margin-bottom: 18px;
+      animation: pulse-soft 2.2s infinite ease-in-out;
+    }
+
+    .pulse-dot-green {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 10px #4ade80, 0 0 18px #22c55e;
+      animation: pulse-soft 1.2s infinite alternate;
+    }
+
+    .audio-card {
+      background: var(--c-glass-card);
+      border: 1px solid var(--c-glass-border);
+      border-radius: 28px;
+      padding: 38px 28px;
+      width: 100%;
+      max-width: 580px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), 0 0 35px rgba(255, 158, 203, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .audio-avatar-wrapper {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      margin-bottom: 24px;
+    }
+
+    .audio-avatar-halo {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 158, 203, 0.35) 0%, rgba(255, 214, 138, 0.2) 60%, transparent 75%);
+      animation: pulse-soft 2.5s infinite ease-in-out;
+    }
+
+    .audio-avatar-moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #FFFDF7 0%, #FFD68A 70%, #D4AF37 100%);
+      box-shadow: 0 0 25px rgba(255, 214, 138, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+    }
+
+    /* Visualizer Waveform */
+    .waveform-visualizer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 65px;
+      width: 100%;
+      max-width: 380px;
+      margin: 15px 0 22px 0;
+      padding: 0 10px;
+    }
+
+    .waveform-bar {
+      width: 4px;
+      height: 12px;
+      background: linear-gradient(180deg, var(--c-sakura) 0%, var(--c-gold) 100%);
+      border-radius: 6px;
+      transition: height 0.1s ease;
+      opacity: 0.55;
+    }
+    .waveform-visualizer.playing .waveform-bar {
+      opacity: 0.95;
+      animation: bar-dance 1.2s infinite ease-in-out alternate;
+    }
+
+    /* Custom Player UI */
+    .audio-controls {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .audio-progress-wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .time-label {
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--c-ivory-muted);
+      min-width: 36px;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 7px;
+      background: rgba(255, 244, 232, 0.12);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--c-sakura) 0%, var(--c-gold) 100%);
+      border-radius: 10px;
+      box-shadow: 0 0 10px var(--c-gold);
+    }
+
+    .player-btn-main {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-sakura) 100%);
+      border: none;
+      color: var(--c-midnight);
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255, 214, 138, 0.4);
+      transition: var(--transition-smooth);
+    }
+
+    .player-btn-main:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 28px rgba(255, 158, 203, 0.5);
+    }
+
+    .audio-fallback-banner {
+      margin-top: 18px;
+      padding: 12px 18px;
+      background: rgba(37, 24, 47, 0.8);
+      border: 1px dashed rgba(255, 214, 138, 0.35);
+      border-radius: 14px;
+      font-size: 0.82rem;
+      color: var(--c-ivory-muted);
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       SCENE 5: KAASH AAP YAHIN HOTI (PAANI PILAO ANIMATION)
+       ========================================================================== */
+    .animation-stage-box {
+      position: relative;
+      width: 100%;
+      max-width: 680px;
+      height: 440px;
+      margin: 15px auto 25px auto;
+      border-radius: 24px;
+      background: radial-gradient(circle at 50% 40%, rgba(37, 24, 47, 0.85) 0%, rgba(16, 13, 32, 0.95) 100%);
+      border: 1px solid var(--c-glass-border);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(255, 214, 138, 0.08);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .water-svg-stage {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Couple SVG Animation Key Elements */
+    #svg-stage-halo {
+      transition: opacity 1.2s ease, transform 1.2s ease;
+      opacity: 0.15;
+      transform-origin: 400px 240px;
+    }
+
+    #woman-group {
+      transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+      transform-origin: 240px 380px;
+    }
+
+    #woman-arms {
+      transition: transform 1.6s cubic-bezier(0.25, 0.9, 0.3, 1);
+      transform-origin: 270px 275px;
+      transform: translate(-10px, 8px) rotate(4deg);
+    }
+
+    #water-pool {
+      transition: opacity 1.2s ease, transform 1.6s ease;
+      transform-origin: 395px 326px;
+      opacity: 0;
+      transform: scale(0.15);
+    }
+
+    #water-ripples {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    #water-droplets {
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    #man-group {
+      transition: transform 1.6s cubic-bezier(0.2, 0.85, 0.3, 1);
+      transform-origin: 550px 420px;
+    }
+
+    #man-head-neck {
+      transition: transform 1.6s cubic-bezier(0.25, 0.9, 0.3, 1);
+      transform-origin: 550px 235px;
+    }
+
+    #woman-smile-happy,
+    #man-smile-happy,
+    #couple-smiles {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    /* Phase 1: She appears */
+    .animation-stage-box[data-phase="1"] #svg-stage-halo {
+      opacity: 0.45;
+      transform: scale(1.1);
+    }
+    .animation-stage-box[data-phase="1"] #woman-arms {
+      transform: translate(-4px, 2px) rotate(1deg);
+    }
+
+    /* Phase 2: She offers water in cupped hands */
+    .animation-stage-box[data-phase="2"] #svg-stage-halo {
+      opacity: 0.65;
+      transform: scale(1.2);
+    }
+    .animation-stage-box[data-phase="2"] #woman-arms {
+      transform: translate(32px, -8px) rotate(-4deg);
+    }
+    .animation-stage-box[data-phase="2"] #water-pool {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .animation-stage-box[data-phase="2"] #water-ripples {
+      opacity: 0.85;
+      animation: ripple-pulse 1.8s infinite ease-out;
+    }
+    .animation-stage-box[data-phase="2"] #water-droplets {
+      opacity: 0.85;
+      animation: float-droplets 2s infinite ease-in-out;
+    }
+    .animation-stage-box[data-phase="2"] #man-head-neck {
+      transform: translate(-28px, 14px) rotate(-6deg);
+    }
+
+    /* Phase 3: He drinks from her hands */
+    .animation-stage-box[data-phase="3"] #svg-stage-halo {
+      opacity: 0.8;
+      transform: scale(1.3);
+    }
+    .animation-stage-box[data-phase="3"] #woman-arms {
+      transform: translate(35px, -6px) rotate(-3deg);
+    }
+    .animation-stage-box[data-phase="3"] #man-group {
+      transform: translate(-35px, 0);
+    }
+    .animation-stage-box[data-phase="3"] #man-head-neck {
+      transform: translate(-82px, 42px) rotate(-16deg);
+      animation: drinking-bob 2.4s ease-in-out;
+    }
+    .animation-stage-box[data-phase="3"] #water-pool {
+      opacity: 0.35;
+      transform: scale(0.35) translateY(6px);
+      transition: transform 2.2s ease-in-out, opacity 2.2s ease-in-out;
+    }
+    .animation-stage-box[data-phase="3"] #water-ripples {
+      opacity: 1;
+      animation: ripple-pulse 0.9s infinite ease-out;
+    }
+
+    /* Phase 4: Emotional smile & bloom */
+    .animation-stage-box[data-phase="4"] #svg-stage-halo {
+      opacity: 1;
+      transform: scale(1.45);
+      filter: drop-shadow(0 0 25px rgba(255, 214, 138, 0.7));
+    }
+    .animation-stage-box[data-phase="4"] #woman-arms {
+      transform: translate(16px, -2px) rotate(-1deg);
+    }
+    .animation-stage-box[data-phase="4"] #man-head-neck {
+      transform: translate(-32px, -4px) rotate(2deg);
+    }
+    .animation-stage-box[data-phase="4"] #couple-smiles,
+    .animation-stage-box[data-phase="4"] #woman-smile-happy,
+    .animation-stage-box[data-phase="4"] #man-smile-happy {
+      opacity: 1;
+    }
+    .animation-stage-box[data-phase="4"] #water-pool {
+      opacity: 0.25;
+      transform: scale(0.25);
+    }
+    .animation-stage-box[data-phase="4"] #water-droplets {
+      opacity: 1;
+      animation: float-droplets 3s infinite ease-in-out;
+    }
+
+    /* Water Animation Reveal Text Card */
+    .water-reveal-card {
+      display: none;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      width: 100%;
+      margin-top: 20px;
+      text-align: left;
+    }
+    .water-reveal-card.shown {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .water-reveal-text {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--c-ivory);
+      margin-bottom: 16px;
+    }
+
+    .water-action-btns {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    /* ==========================================================================
+       SCENE 6: OUR LITTLE UNIVERSE (PROJECT NEZUMI)
+       ========================================================================== */
+    .universe-moon-wrapper {
+      position: relative;
+      width: 190px;
+      height: 190px;
+      margin: 10px auto 25px auto;
+    }
+
+    .universe-silhouette {
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 70px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .final-letter-card {
+      background: var(--c-glass-card);
+      border: 1px solid var(--c-glass-border);
+      border-radius: 26px;
+      padding: 38px 32px;
+      max-width: 660px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 158, 203, 0.15);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .final-letter-text {
+      font-size: 1.06rem;
+      line-height: 1.85;
+      color: var(--c-ivory);
+      margin-bottom: 18px;
+    }
+
+    .final-highlight-quote {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+      color: var(--c-gold-bright);
+      margin: 22px 0;
+      text-transform: uppercase;
+      text-shadow: 0 0 18px rgba(255, 214, 138, 0.4);
+    }
+
+    .final-signature {
+      font-family: var(--font-script);
+      font-size: 1.85rem;
+      color: var(--c-sakura);
+      margin-top: 22px;
+      text-shadow: 0 0 15px rgba(255, 158, 203, 0.4);
+    }
+
+    /* ==========================================================================
+       KEYFRAME ANIMATIONS
+       ========================================================================== */
+    @keyframes moon-rise-entrance {
+      0% {
+        transform: translateY(70px) scale(0.85);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes pulse-soft {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+
+    @keyframes gradient-shimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes moon-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes aura-expand {
+      0% { transform: scale(0.95); opacity: 0.3; }
+      100% { transform: scale(1.15); opacity: 0.6; }
+    }
+
+    @keyframes flame-flicker {
+      0% { transform: scale(1) rotate(-1deg); }
+      25% { transform: scale(1.08, 0.95) rotate(2deg); }
+      50% { transform: scale(0.95, 1.05) rotate(-2deg); }
+      75% { transform: scale(1.05, 1.02) rotate(1deg); }
+      100% { transform: scale(1.02, 0.98) rotate(-1deg); }
+    }
+
+    @keyframes bounce-subtle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes bar-dance {
+      0% { height: 8px; }
+      50% { height: 48px; }
+      100% { height: 18px; }
+    }
+
+    @keyframes water-pulse {
+      0%, 100% { box-shadow: 0 6px 25px rgba(112, 214, 255, 0.35), 0 0 35px rgba(255, 158, 203, 0.3); }
+      50% { box-shadow: 0 8px 35px rgba(112, 214, 255, 0.65), 0 0 50px rgba(255, 214, 138, 0.5); }
+    }
+
+    @keyframes water-ripple-expand {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    @keyframes ripple-pulse {
+      0% { transform: scale(0.6); opacity: 0.9; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    @keyframes float-droplets {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.15); }
+    }
+
+    @keyframes drinking-bob {
+      0% { transform: translate(-80px, 40px) rotate(-16deg); }
+      25% { transform: translate(-84px, 44px) rotate(-18deg); }
+      50% { transform: translate(-80px, 41px) rotate(-15deg); }
+      75% { transform: translate(-85px, 45px) rotate(-17deg); }
+      100% { transform: translate(-82px, 42px) rotate(-16deg); }
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN (Mobile First & Tablet/Desktop)
+       ========================================================================== */
+    @media (max-width: 600px) {
+      .scene-title {
+        font-size: 1.85rem;
+        letter-spacing: 0.08em;
+      }
+      .pre-heading {
+        font-size: 1.25rem;
+      }
+      .scene-subtitle {
+        font-size: 1.02rem;
+      }
+      .btn-romantic {
+        padding: 14px 28px;
+        font-size: 0.88rem;
+        letter-spacing: 0.1em;
+        width: 100%;
+        max-width: 320px;
+      }
+      .entrance-moon-wrapper {
+        width: 170px;
+        height: 170px;
+      }
+      .channi-stage {
+        height: 310px;
+      }
+      .channi-moon-bg {
+        width: 150px;
+        height: 150px;
+      }
+      .channi-interactive {
+        width: 200px;
+        height: 200px;
+      }
+      .animation-stage-box {
+        height: 320px;
+      }
+      .letter-parchment {
+        padding: 30px 22px;
+      }
+      .letter-salutation {
+        font-size: 1.7rem;
+      }
+      .letter-paragraph {
+        font-size: 0.96rem;
+      }
+      .hud-header {
+        padding: 0 14px;
+      }
+      .scene-indicators {
+        gap: 8px;
+        padding: 5px 10px;
+      }
+    }
+
+    /* Accessibility: Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .channi-interactive.lifted {
+        transform: translateY(-80px);
+        opacity: 0.3;
+      }
+      .animation-stage-box[data-phase="3"] #man-head-neck {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Stars & Petals Background Canvas -->
+  <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+  <div class="bg-vignette" aria-hidden="true"></div>
+
+  <!-- Header HUD (Progress & Audio Toggle) -->
+  <header class="hud-header">
+    <div class="brand-title">
+      <span class="sparkle">🌸</span>
+      <span>PROJECT NEZUMI</span>
+    </div>
+
+    <!-- 6 Glowing Scene Indicators -->
+    <nav class="scene-indicators" aria-label="Experience Progress">
+      <button class="scene-dot active" data-scene="1" title="Scene 1: Moonlit Entrance" aria-label="Go to Scene 1"></button>
+      <button class="scene-dot" data-scene="2" title="Scene 2: Virtual Channi" aria-label="Go to Scene 2"></button>
+      <button class="scene-dot" data-scene="3" title="Scene 3: From My Heart to Yours" aria-label="Go to Scene 3"></button>
+      <button class="scene-dot" data-scene="4" title="Scene 4: New Song in App Nezumi" aria-label="Go to Scene 4"></button>
+      <button class="scene-dot" data-scene="5" title="Scene 5: Kaash Aap Yahin Hoti" aria-label="Go to Scene 5"></button>
+      <button class="scene-dot" data-scene="6" title="Scene 6: Project Nezumi" aria-label="Go to Scene 6"></button>
+    </nav>
+
+    <div class="hud-actions">
+      <!-- Ambient Music Toggle (Web Audio Synth) -->
+      <button id="ambient-audio-btn" class="hud-btn" title="Toggle Celestial Ambient Music" aria-label="Toggle Celestial Ambient Music">
+        <span id="music-icon">🎵</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container for All 6 Interactive Scenes -->
+  <main class="experience-container">
+
+    <!-- ====================================================================
+         SCENE 1: THE MOONLIT ENTRANCE
+         ==================================================================== -->
+    <section id="scene-1" class="scene active" aria-labelledby="s1-title">
+      <div class="entrance-moon-wrapper">
+        <div class="moon-glow-aura"></div>
+        <div class="celestial-moon">
+          <div class="moon-crater crater-1"></div>
+          <div class="moon-crater crater-2"></div>
+          <div class="moon-crater crater-3"></div>
+          <div class="moon-crater crater-4"></div>
+        </div>
+      </div>
+
+      <p class="pre-heading staged-reveal" data-delay="300">A little surprise for my favourite person…</p>
+      <h1 id="s1-title" class="scene-title staged-reveal" data-delay="700">ONE MOON, TWO HEARTS.</h1>
+      <p class="scene-subtitle staged-reveal" data-delay="1100">Tonight, even the distance between us couldn't stop me from doing something for you.</p>
+      <p class="scene-note staged-reveal" data-delay="1500">A virtual Karwa Chauth, from my heart to yours. 🌙</p>
+
+      <div class="staged-reveal" data-delay="1900">
+        <button id="btn-scene-1-next" class="btn-romantic" type="button">
+          <span>Come see the moon, meri jaan ✨</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCENE 2: THE VIRTUAL CHANNI RITUAL
+         ==================================================================== -->
+    <section id="scene-2" class="scene" aria-labelledby="s2-title">
+      <p class="pre-heading">Our Sacred Moment</p>
+      <h2 id="s2-title" class="sr-only">The Virtual Channi Ritual</h2>
+
+      <!-- Visual Stage: Moon + Interactive Channi + Diya -->
+      <div class="channi-stage">
+        <!-- Glowing Moon behind the Channi -->
+        <div id="channi-moon" class="channi-moon-bg"></div>
+
+        <!-- Interactive Channi SVG -->
+        <div id="interactive-channi" class="channi-interactive" role="button" tabindex="0" aria-label="Tap to lift the channi and reveal the moon">
+          <svg viewBox="0 0 300 300" width="100%" height="100%" style="overflow: visible;">
+            <defs>
+              <!-- Brass Mesh Pattern -->
+              <pattern id="channiMesh" width="8" height="8" patternUnits="userSpaceOnUse">
+                <path d="M 0 0 L 8 8 M 8 0 L 0 8" stroke="#D4AF37" stroke-width="0.8" opacity="0.65" />
+              </pattern>
+              <!-- Gold Rim Gradient -->
+              <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFE8A3" />
+                <stop offset="40%" stop-color="#D4AF37" />
+                <stop offset="80%" stop-color="#AA771C" />
+                <stop offset="100%" stop-color="#FFE8A3" />
+              </linearGradient>
+            </defs>
+
+            <!-- Outer Decorative Sieve Rim -->
+            <circle cx="150" cy="150" r="130" fill="url(#channiMesh)" />
+            <circle cx="150" cy="150" r="130" fill="none" stroke="url(#goldRim)" stroke-width="14" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.5))" />
+            <circle cx="150" cy="150" r="122" fill="none" stroke="#FFD68A" stroke-width="2" opacity="0.8" />
+            <circle cx="150" cy="150" r="138" fill="none" stroke="#FFD68A" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7" />
+
+            <!-- Filigree rivets around rim -->
+            <g fill="#FFF4E8" opacity="0.9">
+              <circle cx="150" cy="12" r="3" />
+              <circle cx="150" cy="288" r="3" />
+              <circle cx="12" cy="150" r="3" />
+              <circle cx="288" cy="150" r="3" />
+              <circle cx="52" cy="52" r="2.5" />
+              <circle cx="248" cy="52" r="2.5" />
+              <circle cx="52" cy="248" r="2.5" />
+              <circle cx="248" cy="248" r="2.5" />
+            </g>
+
+            <!-- Hanging golden drops/bells (latkan) -->
+            <g stroke="#D4AF37" stroke-width="1.5" fill="#FFD68A">
+              <line x1="120" y1="280" x2="120" y2="305" />
+              <circle cx="120" cy="308" r="4.5" />
+              <line x1="150" y1="288" x2="150" y2="318" />
+              <circle cx="150" cy="322" r="6" />
+              <line x1="180" y1="280" x2="180" y2="305" />
+              <circle cx="180" cy="308" r="4.5" />
+            </g>
+          </svg>
+
+          <!-- Floating instruction hint -->
+          <div id="tap-hint" class="tap-hint-pill">
+            <span>✨ Tap the channi to look at the moon</span>
+          </div>
+        </div>
+
+        <!-- Glowing Diya with flickering wick -->
+        <div class="diya-container">
+          <div class="diya-flame"></div>
+          <div class="diya-bowl"></div>
+        </div>
+      </div>
+
+      <!-- Initial Message before interaction -->
+      <div id="channi-pre-text" class="glass-card" style="margin-top: 15px;">
+        <p class="scene-subtitle" style="margin-bottom: 8px;">Mere paas asli channi nahi hai, meri jaan…</p>
+        <p class="scene-subtitle" style="margin-bottom: 0;">Toh socha, kyun na hum apni chhoti si virtual Karwa Chauth moment bana lein?</p>
+      </div>
+
+      <!-- Post-interaction reveal text and button -->
+      <div id="channi-post-text" class="glass-card" style="display: none; margin-top: 15px; opacity: 0; transition: opacity 0.8s ease;">
+        <p class="scene-subtitle" style="color: var(--c-gold-bright); font-size: 1.25rem; font-weight: 500; margin-bottom: 24px;">
+          “Chaand toh aaj bhi wahi hai… bas meri dua ka sabse pyaara hissa mujhse door hai. ❤️”
+        </p>
+        <button id="btn-scene-2-next" class="btn-romantic" type="button">
+          <span>A little something from my heart</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCENE 3: FROM MY HEART TO YOURS (LETTER)
+         ==================================================================== -->
+    <section id="scene-3" class="scene" aria-labelledby="s3-title">
+      <p class="pre-heading">From My Heart to Yours ❤️🌙</p>
+      <h2 id="s3-title" class="sr-only">From My Heart to Yours</h2>
+
+      <div class="letter-parchment">
+        <!-- Gold corner filigree borders -->
+        <div class="letter-corner-gold corner-tl"></div>
+        <div class="letter-corner-gold corner-tr"></div>
+        <div class="letter-corner-gold corner-bl"></div>
+        <div class="letter-corner-gold corner-br"></div>
+        <div class="letter-candle-glow"></div>
+
+        <h3 class="letter-salutation">Meri Pyaari Jaan… 🥹🎀</h3>
+
+        <!-- Exact letter paragraphs with staged reveal -->
+        <p class="letter-paragraph" data-p="1">Baby, pata hai, aaj maine aapke liye vrat rakha hu 🥺❤️</p>
+        <p class="letter-paragraph" data-p="2">Karwa Chauth par wives apne husbands ki lambi umar ke liye vrat rakhti hain, unke liye preykarti hain…  lekin yaar jab main apni poori zindagi aapke saath bitaana chahta hoon, toh prey karne ka haq sirf apke pass kyu rahe apun bhi kar skata hai na meri jaan samjhe 🫂❤️</p>
+        <p class="letter-paragraph" data-p="3">Main bhi toh aapse utna hi pyaar karta hoon, meri jaan. Aapki khushi, aapki sehat, aapki khushi… mere liye bhi utni hi impppp hai Toh socha, aaj ka din main bhi aapke naam fast rakhiu. 🌙💗</p>
+        <p class="letter-paragraph" data-p="4">Aap mere liye vrat nahi rakh paayi, and that's completely okay, baby🥹 Aap hain, aapka pyaar hai… mere liye wohi sabse badi baat hai🫶🏻❤️</p>
+        <p class="letter-paragraph" data-p="5">Bas aaj chaand ko dekhte hue ek chhota sa sapna dekha… ki ek din hum dono saath honge. Koi distance nahi, koi phone screen nahi, koi video call par ek doosre ko miss karna nahi. Bas aap mere saamne hongi, main aapka haath pakde rahunga, aur dil mein yahi sukoon hoga ki yesss meri jaan we made it and we are together always 🥹🫂</p>
+        <p class="letter-paragraph" data-p="6">Happy Karwa Chauth, meri pyaari jaan. Aap hamesha khush raho, healthy raho, haste raho… aur jab bhi zindagi mushkil lage, yaad rakhna ki kahin door ek insaan hai jo aapki smile karne ko 24  into 7 baitha hai . 🥹🎀</p>
+        <p class="letter-paragraph" data-p="7">I love you more than these words can ever explain, meri jaan. Aaj bhi, kal bhi, aur un saare dino mein bhi jo hum abhi saath jeena baaki hain🫶🏻❤️🌸</p>
+
+        <div style="text-align: center; margin-top: 28px;">
+          <button id="btn-scene-3-next" class="btn-romantic" type="button">
+            <span>Listen to my song 🎵🎧</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCENE 4: MUSIC / NEW SONG ADDED IN APP NEZUMI
+         ==================================================================== -->
+    <section id="scene-4" class="scene" aria-labelledby="s4-title">
+      <!-- Special Announcement Badge -->
+      <div class="nezumi-app-badge">
+        <span class="pulse-dot-green"></span>
+        <span>✨ New song added in app Nezumi 🌸⚡</span>
+      </div>
+
+      <p class="pre-heading">Whispers In The Moonlight</p>
+      <h2 id="s4-title" class="scene-title">Close your eyes, meri jaan. 🎧</h2>
+      <p class="scene-subtitle">
+        I wish I could sing this while sitting right beside you. Until then, here's a little melody from my heart to yours.
+      </p>
+
+      <div class="audio-card">
+        <!-- Avatar with subtle golden halo -->
+        <div class="audio-avatar-wrapper">
+          <div class="audio-avatar-halo"></div>
+          <div class="audio-avatar-moon">🌙</div>
+        </div>
+
+        <p style="font-family: var(--font-display); font-size: 0.95rem; letter-spacing: 0.15em; color: var(--c-gold); margin-bottom: 6px;">
+          NEW TRACK IN APP NEZUMI
+        </p>
+        <p style="font-size: 0.85rem; color: var(--c-sakura-soft); margin-bottom: 15px;">
+          WhatsApp Audio 2026-10-29 at 17.47.17.mp4
+        </p>
+
+        <!-- Dynamic Animated Sound Waveform (Bars) -->
+        <div id="audio-waveform" class="waveform-visualizer" aria-hidden="true">
+          <!-- 21 Waveform Bars -->
+          <div class="waveform-bar" style="height: 16px;"></div>
+          <div class="waveform-bar" style="height: 28px;"></div>
+          <div class="waveform-bar" style="height: 22px;"></div>
+          <div class="waveform-bar" style="height: 40px;"></div>
+          <div class="waveform-bar" style="height: 32px;"></div>
+          <div class="waveform-bar" style="height: 52px;"></div>
+          <div class="waveform-bar" style="height: 38px;"></div>
+          <div class="waveform-bar" style="height: 25px;"></div>
+          <div class="waveform-bar" style="height: 44px;"></div>
+          <div class="waveform-bar" style="height: 55px;"></div>
+          <div class="waveform-bar" style="height: 30px;"></div>
+          <div class="waveform-bar" style="height: 18px;"></div>
+          <div class="waveform-bar" style="height: 36px;"></div>
+          <div class="waveform-bar" style="height: 48px;"></div>
+          <div class="waveform-bar" style="height: 26px;"></div>
+          <div class="waveform-bar" style="height: 50px;"></div>
+          <div class="waveform-bar" style="height: 34px;"></div>
+          <div class="waveform-bar" style="height: 20px;"></div>
+          <div class="waveform-bar" style="height: 42px;"></div>
+          <div class="waveform-bar" style="height: 28px;"></div>
+          <div class="waveform-bar" style="height: 16px;"></div>
+        </div>
+
+        <!-- Custom Audio Player Controller -->
+        <div class="audio-controls">
+          <div class="audio-progress-wrap">
+            <span id="audio-curr-time" class="time-label">0:00</span>
+            <div id="audio-progress-track" class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" tabindex="0">
+              <div id="audio-progress-fill" class="progress-fill"></div>
+            </div>
+            <span id="audio-total-time" class="time-label">0:53</span>
+          </div>
+
+          <button id="audio-play-btn" class="player-btn-main" type="button" aria-label="Play song">
+            <span id="audio-play-icon">▶</span>
+          </button>
+        </div>
+
+        <!-- Real HTML Audio element pointing directly to WhatsApp Audio with fallbacks -->
+        <audio id="voice-audio-element" preload="auto" src="WhatsApp Audio 2026-10-29 at 17.47.17.mp4">
+          <source src="WhatsApp Audio 2026-10-29 at 17.47.17.mp4" type="audio/mp4">
+          <source src="song.mp4" type="audio/mp4">
+          <source src="song.mp3" type="audio/mpeg">
+          <source src="voice-note.mp3" type="audio/mpeg">
+        </audio>
+
+        <!-- Status note -->
+        <div id="audio-fallback-note" class="audio-fallback-banner" style="display: none;">
+          <span>💡 <strong>Tip:</strong> Tap <strong>Play (▶)</strong> to listen to your personal song.</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <button id="btn-scene-4-next" class="btn-romantic" type="button">
+          <span>Kaash aap yahin hoti… 💧🥹</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCENE 5: KAASH AAP YAHIN HOTI (PAANI PILAO ANIMATION)
+         ==================================================================== -->
+    <section id="scene-5" class="scene" aria-labelledby="s5-title">
+      <p class="pre-heading">A Heartfelt Wish</p>
+      <h2 id="s5-title" class="scene-title">Kaash Aap Yahin Hoti… 🥹❤️</h2>
+      <p class="scene-subtitle">Aaj aap mere paas nahi ho, warna main chahta ki chaand dekhne ke baad aap apne haathon se mujhe paani pilati. ❤️</p>
+
+      <!-- The Big Special Feature Button (Initial Trigger) -->
+      <div id="water-trigger-container" style="margin-bottom: 25px;">
+        <button id="btn-trigger-water" class="btn-romantic btn-water-pulse" type="button">
+          <span>Meko paani pilao, meri jaan 💧</span>
+        </button>
+      </div>
+
+      <!-- The Dedicated Animated Stage (Phase 1 to Phase 4) -->
+      <div id="water-anim-box" class="animation-stage-box" data-phase="0" role="region" aria-label="Water offering animated ritual">
+        <!-- SVG Couple Illustration -->
+        <svg id="water-couple-svg" class="water-svg-stage" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <!-- Background Radial Glow Aura -->
+            <radialGradient id="stageAura" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#FFE8A3" stop-opacity="0.8" />
+              <stop offset="45%" stop-color="#FF9ECB" stop-opacity="0.4" />
+              <stop offset="85%" stop-color="#25182F" stop-opacity="0" />
+            </radialGradient>
+
+            <!-- Woman's Attire Gradient (Pink/Red festive saree) -->
+            <linearGradient id="sareeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FF5277" />
+              <stop offset="60%" stop-color="#C2185B" />
+              <stop offset="100%" stop-color="#880E4F" />
+            </linearGradient>
+
+            <!-- Man's Attire Gradient (Plum/Violet Sherwani with gold accents) -->
+            <linearGradient id="sherwaniGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3C2448" />
+              <stop offset="70%" stop-color="#211329" />
+              <stop offset="100%" stop-color="#140A1A" />
+            </linearGradient>
+
+            <!-- Water Pool Gradient -->
+            <radialGradient id="waterGrad" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+              <stop offset="35%" stop-color="#A0E7E5" stop-opacity="0.85" />
+              <stop offset="75%" stop-color="#70D6FF" stop-opacity="0.75" />
+              <stop offset="100%" stop-color="#0096C7" stop-opacity="0.85" />
+            </radialGradient>
+
+            <!-- Skin Tone Gradients -->
+            <linearGradient id="skinWoman" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFF3E8" />
+              <stop offset="100%" stop-color="#FCE1D1" />
+            </linearGradient>
+            <linearGradient id="skinMan" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFF0E0" />
+              <stop offset="100%" stop-color="#F7D7C4" />
+            </linearGradient>
+          </defs>
+
+          <!-- 1. Background Celestial Aura & Moon -->
+          <circle id="svg-stage-halo" cx="400" cy="240" r="220" fill="url(#stageAura)" />
+          
+          <!-- Distant Moon in the scene -->
+          <circle cx="400" cy="110" r="55" fill="#FFF8E7" opacity="0.9" filter="drop-shadow(0 0 35px rgba(255,214,138,0.7))" />
+
+          <!-- ==============================================
+               WOMAN (LEFT CHARACTER)
+               ============================================== -->
+          <g id="woman-group">
+            <!-- Back Hair Cascade -->
+            <path d="M 200 180 Q 150 250 170 380 Q 210 390 230 350 Z" fill="#1C1424" />
+            
+            <!-- Torso & Festive Outfit -->
+            <path d="M 215 270 Q 250 260 285 270 L 300 450 L 190 450 Z" fill="url(#sareeGradient)" />
+            <!-- Gold Embroidery Borders -->
+            <path d="M 220 275 Q 250 268 280 275" stroke="#FFD68A" stroke-width="4" fill="none" />
+            <path d="M 230 295 L 295 440" stroke="#FFD68A" stroke-width="3" stroke-dasharray="6,4" fill="none" />
+
+            <!-- Woman Neck & Head -->
+            <path d="M 240 220 L 260 220 L 260 260 L 240 260 Z" fill="url(#skinWoman)" />
+            <!-- Delicate Golden Necklace -->
+            <path d="M 238 250 Q 250 260 262 250" stroke="#FFD68A" stroke-width="3" fill="none" />
+
+            <!-- Face (Profile / 3/4 facing right) -->
+            <path d="M 235 170 Q 275 160 278 195 Q 280 225 250 238 Q 230 235 235 170 Z" fill="url(#skinWoman)" />
+            
+            <!-- Eyes & Tender Expression -->
+            <!-- Soft Rosy Blush -->
+            <ellipse cx="265" cy="208" rx="8" ry="4.5" fill="#FF80AB" opacity="0.65" />
+            <!-- Eye (Gentle curved lash) -->
+            <path d="M 258 194 Q 268 190 274 196" stroke="#25182F" stroke-width="2.5" stroke-linecap="round" fill="none" />
+            
+            <!-- Gentle lips / smiling in Phase 4 -->
+            <path id="woman-smile-happy" d="M 268 218 Q 274 225 279 219" stroke="#8C2442" stroke-width="2.2" stroke-linecap="round" fill="none" />
+
+            <!-- Bindi (Traditional red dot) -->
+            <circle cx="272" cy="184" r="2.2" fill="#D81B60" />
+            <!-- Maang Tikka (Forehead jewelry) -->
+            <line x1="262" y1="162" x2="271" y2="180" stroke="#FFD68A" stroke-width="1.8" />
+            <circle cx="271" cy="180" r="2.8" fill="#FFD68A" />
+
+            <!-- Front Hair & Bangs -->
+            <path d="M 230 165 Q 265 140 282 175 Q 270 185 260 178 Q 240 182 230 165 Z" fill="#2A1B30" />
+            <!-- Jasmine Gajra Flowers in hair -->
+            <circle cx="225" cy="185" r="4" fill="#FFFDF7" />
+            <circle cx="220" cy="195" r="4.5" fill="#FFFDF7" />
+            <circle cx="223" cy="205" r="4" fill="#FFFDF7" />
+
+            <!-- Golden Jhumka Earring -->
+            <path d="M 242 210 L 242 218 L 238 226 L 246 226 Z" fill="#FFD68A" stroke="#B8860B" stroke-width="0.8" />
+
+            <!-- WOMAN'S ARMS AND CUPPED HANDS (Articulated Group) -->
+            <g id="woman-arms">
+              <!-- Left & Right Forearms stretching forward -->
+              <path d="M 270 275 Q 315 285 365 315 L 360 335 Q 305 305 265 295 Z" fill="url(#skinWoman)" />
+              
+              <!-- Red/Gold Bangles on wrists (Chooda) -->
+              <rect x="345" y="310" width="16" height="5" rx="2.5" transform="rotate(25 353 312)" fill="#D81B60" stroke="#FFD68A" stroke-width="1" />
+              <rect x="350" y="318" width="16" height="4" rx="2" transform="rotate(25 358 320)" fill="#FFD68A" />
+
+              <!-- CUPPED HANDS (Forming a delicate natural vessel) -->
+              <g id="cupped-palms-container">
+                <!-- Under palm shadow -->
+                <path d="M 368 328 Q 395 348 422 328 Q 410 350 380 348 Z" fill="#E6C4B0" />
+                <!-- Cupped Hands base -->
+                <path d="M 368 322 Q 395 342 422 322 Q 412 340 395 342 Q 378 340 368 322 Z" fill="url(#skinWoman)" stroke="#E2B79E" stroke-width="1.5" />
+
+                <!-- WATER POOL IN PALMS -->
+                <ellipse id="water-pool" cx="395" cy="326" rx="22" ry="10" fill="url(#waterGrad)" filter="drop-shadow(0 0 8px rgba(112, 214, 255, 0.8))" />
+
+                <!-- Water Ripples -->
+                <g id="water-ripples">
+                  <ellipse cx="395" cy="326" rx="14" ry="6" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.8" />
+                  <ellipse cx="395" cy="326" rx="20" ry="8" fill="none" stroke="#A0E7E5" stroke-width="1" opacity="0.6" />
+                </g>
+
+                <!-- Floating Water Droplets -->
+                <g id="water-droplets">
+                  <circle cx="390" cy="315" r="2.5" fill="#E0F7FA" filter="drop-shadow(0 0 4px #70D6FF)" />
+                  <circle cx="406" cy="312" r="2" fill="#E0F7FA" filter="drop-shadow(0 0 4px #70D6FF)" />
+                  <circle cx="398" cy="305" r="3" fill="#FFFFFF" filter="drop-shadow(0 0 6px #70D6FF)" />
+                </g>
+              </g>
+            </g>
+          </g>
+
+          <!-- ==============================================
+               MAN (RIGHT CHARACTER)
+               ============================================== -->
+          <g id="man-group">
+            <!-- Torso & Kurta/Sherwani -->
+            <path d="M 505 270 Q 550 260 595 270 L 620 450 L 480 450 Z" fill="url(#sherwaniGradient)" />
+            <!-- Gold trimmed mandarin collar -->
+            <path d="M 535 260 L 565 260 L 565 340 L 535 340 Z" fill="#23132B" stroke="#FFD68A" stroke-width="1.5" />
+            <line x1="550" y1="262" x2="550" y2="335" stroke="#FFD68A" stroke-width="2" />
+            <!-- Gold buttons on kurta -->
+            <circle cx="550" cy="275" r="2.5" fill="#FFD68A" />
+            <circle cx="550" cy="295" r="2.5" fill="#FFD68A" />
+            <circle cx="550" cy="315" r="2.5" fill="#FFD68A" />
+
+            <!-- MAN'S HEAD & NECK (Articulated for Leaning / Drinking) -->
+            <g id="man-head-neck">
+              <!-- Neck -->
+              <path d="M 538 225 L 562 225 L 562 265 L 538 265 Z" fill="url(#skinMan)" />
+
+              <!-- Face (Profile facing left toward her hands) -->
+              <path d="M 565 170 Q 520 160 518 195 Q 515 228 545 240 Q 568 238 565 170 Z" fill="url(#skinMan)" />
+
+              <!-- Man's Facial Details -->
+              <!-- Eye -->
+              <path d="M 536 195 Q 528 190 522 196" stroke="#1D1222" stroke-width="2.5" stroke-linecap="round" fill="none" />
+              <!-- Soft Cheek Blush in Phase 4 -->
+              <ellipse cx="532" cy="210" rx="8" ry="4.5" fill="#FF80AB" opacity="0.45" />
+
+              <!-- Man smiling warmly in Phase 4 -->
+              <path id="man-smile-happy" d="M 526 218 Q 520 225 514 219" stroke="#3C1A4A" stroke-width="2.2" stroke-linecap="round" fill="none" />
+
+              <!-- Anime Style Hair with Warm Amber Tips (Zenitsu nod) -->
+              <!-- Base Dark Hair -->
+              <path d="M 575 160 Q 525 140 510 178 Q 525 185 535 175 Q 545 170 560 168 Q 575 180 580 165 Z" fill="#1C1424" />
+              <!-- Golden Highlight Spikes / Tips -->
+              <path d="M 515 172 L 505 184 L 522 180 Z" fill="#FFD68A" opacity="0.9" />
+              <path d="M 524 165 L 515 174 L 532 170 Z" fill="#FFE082" opacity="0.9" />
+              <path d="M 540 152 L 532 165 L 550 160 Z" fill="#FFD68A" opacity="0.9" />
+              <path d="M 570 155 Q 585 190 580 230 Q 570 235 565 210 Z" fill="#1C1424" />
+            </g>
+          </g>
+
+          <!-- ==============================================
+               RADIANT SMILES & BLOOM (PHASE 4 FX)
+               ============================================== -->
+          <g id="couple-smiles">
+            <!-- Heart-shaped golden sparkles between them -->
+            <path d="M 400 240 C 400 230 385 230 385 242 C 385 255 400 265 400 265 C 400 265 415 255 415 242 C 415 230 400 230 400 240 Z" fill="#FFD68A" filter="drop-shadow(0 0 10px #FFD68A)" opacity="0.85" />
+            <!-- Golden starbursts -->
+            <circle cx="340" cy="220" r="3" fill="#FFF4E8" filter="drop-shadow(0 0 6px #FFD68A)" />
+            <circle cx="460" cy="210" r="3" fill="#FFF4E8" filter="drop-shadow(0 0 6px #FFD68A)" />
+          </g>
+        </svg>
+      </div>
+
+      <!-- Post-Animation Text Reveal Card (Exact User Words) -->
+      <div id="water-reveal-card" class="water-reveal-card glass-card">
+        <p class="water-reveal-text">
+          Meri jaan, Karwa Chauth ki woh rasam dekho toh kitni pyaari lagti hai na? Wife apne pati ke liye vrat rakhti hai, chaand ko dekhti hai, aur phir pati apne haathon se use paani pilata hai… 🥹🫂❤️
+        </p>
+        <p class="water-reveal-text">
+          Aur aaj maine socha… agar main aapke liye vrat rakh sakta hoon, toh apne dil mein ek chhoti si wish kyun na rakhun? Ki ek din aisa aaye jab aap mere saamne hon, chaand hum dono ne saath dekha ho, aur phir aap apne nanhe-nanhe haathon mein paani lekar mujhe pilao. 🥺💗
+        </p>
+        <p class="water-reveal-text">
+          Main thoda sa aapki taraf jhukoon, aap pyaar se mujhe paani pilao, aur main paani peene ke baad bas aapko dekhta rahoon… aur smile kar doon. Shayad aap poochho, Kya hua, aise kyun dekh rahe ho?”🤭❤️
+        </p>
+        <p class="water-reveal-text">
+          Aaj toh ye sab sirf imagination mein hai, aur is chhoti si website mein humara virtual moment… lekin ek din, meri jaan, main chahta hoon ki ye sirf animation na rahe. Main chahta hoon ki hum sach mein saath hon, aur ye chhoti si wish humari real memory ban jaaye. 🥹❤️
+        </p>
+        <p class="water-reveal-text" style="font-weight: 500; color: var(--c-gold-bright);">
+          Tab tak, is virtual moment ko humare us din ke liye sambhaal ke rakhte hain… jab main screen ke us paar nahi, balki aapke bilkul saamne hounga🌙🫂💗
+        </p>
+
+        <!-- Replay and Continue Buttons -->
+        <div class="water-action-btns">
+          <button id="btn-replay-water" class="btn-romantic btn-secondary" type="button">
+            <span>Can we do this for real one day? 🥹</span>
+          </button>
+          <button id="btn-scene-5-next" class="btn-romantic" type="button">
+            <span>Continue our little story 🌸</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SCENE 6: OUR LITTLE UNIVERSE (PROJECT NEZUMI)
+         ==================================================================== -->
+    <section id="scene-6" class="scene" aria-labelledby="s6-title">
+      <!-- Silhouette Under Moon -->
+      <div class="universe-moon-wrapper">
+        <div class="moon-glow-aura" style="animation-duration: 3s;"></div>
+        <div class="celestial-moon">
+          <div class="moon-crater crater-1"></div>
+          <div class="moon-crater crater-3"></div>
+        </div>
+
+        <!-- Couple Silhouette SVG sitting together -->
+        <svg class="universe-silhouette" viewBox="0 0 160 90">
+          <!-- Moonlit rooftop/ledge -->
+          <rect x="0" y="80" width="160" height="10" fill="#0C0818" rx="2" />
+          <!-- Couple resting shoulders together -->
+          <!-- Zenitsu figure -->
+          <circle cx="92" cy="42" r="14" fill="#0D091A" />
+          <path d="M 80 56 Q 92 50 106 56 L 112 82 L 78 82 Z" fill="#0D091A" />
+          <!-- Nezuko figure leaning on his shoulder -->
+          <circle cx="70" cy="46" r="13" fill="#0D091A" />
+          <path d="M 58 58 Q 70 54 84 58 L 86 82 L 52 82 Z" fill="#0D091A" />
+          <!-- Flowing hair detail -->
+          <path d="M 58 48 Q 48 65 52 80" stroke="#0D091A" stroke-width="4" fill="none" />
+          <!-- Subtle warm glow between them -->
+          <circle cx="80" cy="55" r="6" fill="#FF9ECB" opacity="0.4" filter="drop-shadow(0 0 8px #FFD68A)" />
+        </svg>
+      </div>
+
+      <div class="final-letter-card">
+        <p class="pre-heading" style="font-size: 1.35rem; margin-bottom: 6px;">🌸 PROJECT NEZUMI ⚡</p>
+        <h2 id="s6-title" class="scene-title" style="font-size: 2.1rem; margin-bottom: 22px;">Happy Karwa Chauth, Meri Jaan. 🌙❤️</h2>
+
+        <p class="final-letter-text">
+          No distance between us. No phone screen to hold. No goodnight whispered through a call before we both fall asleep missing each other.
+        </p>
+
+        <p class="final-letter-text">
+          Bas aap aur main… aapka haath mere haath mein, aapki smile mere saamne, aur dil mein woh sukoon jo shayad sirf aapke paas hone se milta hai. 🫂💗
+        </p>
+
+        <p class="final-letter-text">
+          Aaj meri preyyaapke liye thi. Kal bhi hogi. Aur ek din, jab hum saath honge, toh shayad main aapko ye sab dobara bataunga… bina kisi screen ke, bas aapka haath pakad kar 🌙🫶🏻
+        </p>
+
+        <p class="final-highlight-quote">
+          One moon. Two hearts. Different places, one little universe. ❤️
+        </p>
+
+        <p class="final-signature">
+          nezuko ke liye mai apke zenitsuuuu 🌸⚡❤️
+        </p>
+      </div>
+
+      <!-- Reset / Experience Again Button -->
+      <div>
+        <button id="btn-reset-experience" class="btn-romantic" type="button">
+          <span>Experience Our Little Universe Again ↺</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       VANILLA JAVASCRIPT: State Controller, Canvas FX, Audio & Water Sequences
+       ======================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ======================================================================
+         1. STATE MANAGEMENT (All 6 Scenes)
+         ====================================================================== */
+      const state = {
+        currentScene: 1,
+        totalScenes: 6,
+        visitedScenes: new Set([1]),
+        channiLifted: false,
+        waterAnimationActive: false,
+        ambientMusicPlaying: false,
+        audioContext: null,
+        ambientGainNode: null,
+        ambientInterval: null
+      };
+
+      // DOM Elements
+      const sceneElements = {
+        1: document.getElementById('scene-1'),
+        2: document.getElementById('scene-2'),
+        3: document.getElementById('scene-3'),
+        4: document.getElementById('scene-4'),
+        5: document.getElementById('scene-5'),
+        6: document.getElementById('scene-6')
+      };
+
+      const dotElements = document.querySelectorAll('.scene-dot');
+
+      /* ======================================================================
+         2. SCENE TRANSITION CONTROLLER
+         ====================================================================== */
+      function goToScene(sceneNumber) {
+        if (sceneNumber < 1 || sceneNumber > state.totalScenes) return;
+
+        // Pause audio if navigating away from Scene 4
+        if (state.currentScene === 4 && sceneNumber !== 4) {
+          pauseVoiceNote();
+        }
+
+        const currentElem = sceneElements[state.currentScene];
+        const nextElem = sceneElements[sceneNumber];
+
+        if (currentElem) {
+          currentElem.classList.remove('active');
+          currentElem.style.display = 'none';
+        }
+
+        state.currentScene = sceneNumber;
+        state.visitedScenes.add(sceneNumber);
+
+        if (nextElem) {
+          nextElem.style.display = 'flex';
+          // Force layout reflow for CSS transition
+          void nextElem.offsetWidth;
+          nextElem.classList.add('active');
+        }
+
+        // Update HUD indicator dots
+        dotElements.forEach(dot => {
+          const s = parseInt(dot.getAttribute('data-scene'), 10);
+          dot.classList.toggle('active', s === sceneNumber);
+          dot.classList.toggle('visited', state.visitedScenes.has(s));
+        });
+
+        // Trigger scene-specific stage entrance animations
+        handleSceneEntry(sceneNumber);
+
+        // Scroll to top smoothly
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function handleSceneEntry(sceneNumber) {
+        if (sceneNumber === 1) {
+          const stagedItems = sceneElements[1].querySelectorAll('.staged-reveal');
+          stagedItems.forEach(item => {
+            const delay = parseInt(item.getAttribute('data-delay') || '0', 10);
+            setTimeout(() => {
+              item.classList.add('revealed');
+            }, delay);
+          });
+        } else if (sceneNumber === 3) {
+          // Reveal letter paragraphs sequentially
+          const paragraphs = sceneElements[3].querySelectorAll('.letter-paragraph');
+          paragraphs.forEach((p, idx) => {
+            setTimeout(() => {
+              p.classList.add('shown');
+            }, 250 + idx * 550);
+          });
+        }
+      }
+
+      // Progress Dot Navigation Listeners
+      dotElements.forEach(dot => {
+        dot.addEventListener('click', () => {
+          const target = parseInt(dot.getAttribute('data-scene'), 10);
+          goToScene(target);
+        });
+      });
+
+      /* ======================================================================
+         3. SCENE NAVIGATION BUTTON BINDINGS
+         ====================================================================== */
+      document.getElementById('btn-scene-1-next').addEventListener('click', () => {
+        playCelestialChime();
+        goToScene(2);
+      });
+
+      document.getElementById('btn-scene-2-next').addEventListener('click', () => {
+        playCelestialChime();
+        goToScene(3);
+      });
+
+      document.getElementById('btn-scene-3-next').addEventListener('click', () => {
+        playCelestialChime();
+        goToScene(4);
+      });
+
+      document.getElementById('btn-scene-4-next').addEventListener('click', () => {
+        playCelestialChime();
+        goToScene(5);
+      });
+
+      document.getElementById('btn-scene-5-next').addEventListener('click', () => {
+        playCelestialChime();
+        goToScene(6);
+      });
+
+      document.getElementById('btn-reset-experience').addEventListener('click', () => {
+        playCelestialChime();
+        resetFullExperience();
+      });
+
+      function resetFullExperience() {
+        // Reset Channi ritual
+        state.channiLifted = false;
+        const channi = document.getElementById('interactive-channi');
+        const channiMoon = document.getElementById('channi-moon');
+        const tapHint = document.getElementById('tap-hint');
+        const preText = document.getElementById('channi-pre-text');
+        const postText = document.getElementById('channi-post-text');
+
+        if (channi) channi.classList.remove('lifted');
+        if (channiMoon) channiMoon.classList.remove('burst');
+        if (tapHint) tapHint.style.display = 'flex';
+        if (preText) preText.style.display = 'block';
+        if (postText) {
+          postText.style.display = 'none';
+          postText.style.opacity = '0';
+        }
+
+        // Reset Water Animation
+        resetWaterAnimationUI();
+
+        // Pause audio if playing
+        pauseVoiceNote();
+
+        // Navigate to Scene 1
+        goToScene(1);
+      }
+
+      /* ======================================================================
+         4. SCENE 2: INTERACTIVE CHANNI RITUAL
+         ====================================================================== */
+      const interactiveChanni = document.getElementById('interactive-channi');
+      const channiMoon = document.getElementById('channi-moon');
+      const tapHint = document.getElementById('tap-hint');
+      const channiPreText = document.getElementById('channi-pre-text');
+      const channiPostText = document.getElementById('channi-post-text');
+
+      function triggerChanniLift() {
+        if (state.channiLifted) return;
+        state.channiLifted = true;
+
+        playChanniShimmerSound();
+        spawnSakuraBurst(window.innerWidth / 2, window.innerHeight * 0.38, 25);
+
+        interactiveChanni.classList.add('lifted');
+        channiMoon.classList.add('burst');
+        if (tapHint) tapHint.style.display = 'none';
+
+        setTimeout(() => {
+          if (channiPreText) channiPreText.style.display = 'none';
+          if (channiPostText) {
+            channiPostText.style.display = 'block';
+            void channiPostText.offsetWidth;
+            channiPostText.style.opacity = '1';
+          }
+        }, 800);
+      }
+
+      interactiveChanni.addEventListener('click', triggerChanniLift);
+      interactiveChanni.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          triggerChanniLift();
+        }
+      });
+
+      /* ======================================================================
+         5. SCENE 4: AUDIO PLAYER CONTROLLER & WAVEFORM
+         ====================================================================== */
+      const voiceAudio = document.getElementById('voice-audio-element');
+      const playBtn = document.getElementById('audio-play-btn');
+      const playIcon = document.getElementById('audio-play-icon');
+      const progressTrack = document.getElementById('audio-progress-track');
+      const progressFill = document.getElementById('audio-progress-fill');
+      const currTimeLabel = document.getElementById('audio-curr-time');
+      const totalTimeLabel = document.getElementById('audio-total-time');
+      const visualizerWrap = document.getElementById('audio-waveform');
+      const fallbackNote = document.getElementById('audio-fallback-note');
+
+      let syntheticDemoTimer = null;
+      let syntheticPlayProgress = 0;
+      let isUsingSyntheticPlayback = false;
+
+      // Candidate audio tracks in priority order
+      const candidateAudioFiles = [
+        "WhatsApp Audio 2026-10-29 at 17.47.17.mp4",
+        "song.mp4",
+        "song.mp3",
+        "voice-note.mp3"
+      ];
+      let candidateIndex = 0;
+
+      // Pre-set total time to 0:53
+      if (totalTimeLabel) {
+        totalTimeLabel.textContent = '0:53';
+      }
+
+      function formatTime(seconds) {
+        if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      }
+
+      function toggleVoiceNote() {
+        if (voiceAudio) {
+          if (voiceAudio.paused) {
+            stopSyntheticDemoPlayback();
+
+            const playPromise = voiceAudio.play();
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                playIcon.textContent = '❚❚';
+                visualizerWrap.classList.add('playing');
+                if (fallbackNote) fallbackNote.style.display = 'none';
+              }).catch((err) => {
+                console.warn('Real audio play error, trying candidate sources:', err);
+                tryNextAudioSource();
+              });
+            }
+          } else {
+            pauseVoiceNote();
+          }
+        } else {
+          startSyntheticDemoPlayback();
+        }
+      }
+
+      function tryNextAudioSource() {
+        candidateIndex++;
+        if (candidateIndex < candidateAudioFiles.length && voiceAudio) {
+          console.log('Switching to candidate source:', candidateAudioFiles[candidateIndex]);
+          voiceAudio.src = candidateAudioFiles[candidateIndex];
+          voiceAudio.load();
+          const p = voiceAudio.play();
+          if (p !== undefined) {
+            p.then(() => {
+              playIcon.textContent = '❚❚';
+              visualizerWrap.classList.add('playing');
+              if (fallbackNote) fallbackNote.style.display = 'none';
+            }).catch(() => {
+              tryNextAudioSource();
+            });
+          }
+        } else {
+          startSyntheticDemoPlayback();
+        }
+      }
+
+      function pauseVoiceNote() {
+        if (voiceAudio && !voiceAudio.paused) {
+          voiceAudio.pause();
+        }
+        playIcon.textContent = '▶';
+        visualizerWrap.classList.remove('playing');
+        stopSyntheticDemoPlayback();
+      }
+
+      function startSyntheticDemoPlayback() {
+        isUsingSyntheticPlayback = true;
+        playIcon.textContent = '❚❚';
+        visualizerWrap.classList.add('playing');
+        if (fallbackNote) {
+          fallbackNote.style.display = 'block';
+          fallbackNote.style.borderColor = 'var(--c-sakura)';
+        }
+
+        playRomanticChimeProgression();
+
+        syntheticDemoTimer = setInterval(() => {
+          syntheticPlayProgress += 0.5;
+          if (syntheticPlayProgress > 53.4) {
+            stopSyntheticDemoPlayback();
+            syntheticPlayProgress = 0;
+          }
+          const pct = (syntheticPlayProgress / 53.4) * 100;
+          progressFill.style.width = pct + '%';
+          currTimeLabel.textContent = formatTime(syntheticPlayProgress);
+          totalTimeLabel.textContent = '0:53';
+        }, 500);
+      }
+
+      function stopSyntheticDemoPlayback() {
+        isUsingSyntheticPlayback = false;
+        clearInterval(syntheticDemoTimer);
+        playIcon.textContent = '▶';
+        visualizerWrap.classList.remove('playing');
+      }
+
+      playBtn.addEventListener('click', toggleVoiceNote);
+
+      if (voiceAudio) {
+        voiceAudio.addEventListener('loadedmetadata', () => {
+          if (voiceAudio.duration && isFinite(voiceAudio.duration)) {
+            totalTimeLabel.textContent = formatTime(voiceAudio.duration);
+            if (fallbackNote) fallbackNote.style.display = 'none';
+          }
+        });
+
+        voiceAudio.addEventListener('canplay', () => {
+          if (voiceAudio.duration && isFinite(voiceAudio.duration)) {
+            totalTimeLabel.textContent = formatTime(voiceAudio.duration);
+            if (fallbackNote) fallbackNote.style.display = 'none';
+          }
+        });
+
+        voiceAudio.addEventListener('timeupdate', () => {
+          if (!isUsingSyntheticPlayback && voiceAudio.duration) {
+            const pct = (voiceAudio.currentTime / voiceAudio.duration) * 100;
+            progressFill.style.width = pct + '%';
+            currTimeLabel.textContent = formatTime(voiceAudio.currentTime);
+          }
+        });
+
+        voiceAudio.addEventListener('ended', () => {
+          pauseVoiceNote();
+          progressFill.style.width = '0%';
+        });
+
+        voiceAudio.addEventListener('error', () => {
+          console.warn('Audio error on source, trying next candidate...');
+          tryNextAudioSource();
+        });
+      }
+
+      // Click to Seek
+      progressTrack.addEventListener('click', (e) => {
+        const rect = progressTrack.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+
+        if (voiceAudio && voiceAudio.duration && !voiceAudio.error && isFinite(voiceAudio.duration)) {
+          voiceAudio.currentTime = ratio * voiceAudio.duration;
+        } else {
+          syntheticPlayProgress = ratio * 53.4;
+          progressFill.style.width = (ratio * 100) + '%';
+          currTimeLabel.textContent = formatTime(syntheticPlayProgress);
+        }
+      });
+
+      /* ======================================================================
+         6. SCENE 5: PAANI PILAO WATER OFFERING ANIMATION SEQUENCE
+         ====================================================================== */
+      const btnTriggerWater = document.getElementById('btn-trigger-water');
+      const waterTriggerContainer = document.getElementById('water-trigger-container');
+      const waterAnimBox = document.getElementById('water-anim-box');
+      const waterRevealCard = document.getElementById('water-reveal-card');
+      const btnReplayWater = document.getElementById('btn-replay-water');
+
+      let waterSequenceTimers = [];
+
+      function clearWaterTimers() {
+        waterSequenceTimers.forEach(t => clearTimeout(t));
+        waterSequenceTimers = [];
+      }
+
+      function startWaterRitualAnimation() {
+        if (state.waterAnimationActive) return;
+        state.waterAnimationActive = true;
+
+        clearWaterTimers();
+
+        // Hide trigger button, hide reveal card
+        waterTriggerContainer.style.display = 'none';
+        waterRevealCard.classList.remove('shown');
+        waterRevealCard.style.display = 'none';
+
+        // Phase 1: She appears (0s)
+        waterAnimBox.setAttribute('data-phase', '1');
+        playWaterBloomChime();
+        spawnSakuraBurst(window.innerWidth / 2, window.innerHeight * 0.45, 15);
+
+        // Phase 2: She offers water in cupped palms (2.2s)
+        const t1 = setTimeout(() => {
+          waterAnimBox.setAttribute('data-phase', '2');
+          playWaterRippleSound();
+          spawnWaterSparkles();
+        }, 2200);
+        waterSequenceTimers.push(t1);
+
+        // Phase 3: He leans forward & drinks from her hands (5.0s)
+        const t2 = setTimeout(() => {
+          waterAnimBox.setAttribute('data-phase', '3');
+          playWaterDrinkingSound();
+        }, 5000);
+        waterSequenceTimers.push(t2);
+
+        // Phase 4: Emotional smile, warm golden aura, petals, & text reveal (7.8s)
+        const t3 = setTimeout(() => {
+          waterAnimBox.setAttribute('data-phase', '4');
+          playWarmHeartBloomSound();
+          spawnSakuraBurst(window.innerWidth / 2, window.innerHeight * 0.45, 30);
+
+          setTimeout(() => {
+            waterRevealCard.style.display = 'block';
+            void waterRevealCard.offsetWidth;
+            waterRevealCard.classList.add('shown');
+            state.waterAnimationActive = false;
+          }, 800);
+        }, 7800);
+        waterSequenceTimers.push(t3);
+      }
+
+      function resetWaterAnimationUI() {
+        clearWaterTimers();
+        state.waterAnimationActive = false;
+        waterAnimBox.setAttribute('data-phase', '0');
+        waterTriggerContainer.style.display = 'block';
+        waterRevealCard.classList.remove('shown');
+        waterRevealCard.style.display = 'none';
+      }
+
+      btnTriggerWater.addEventListener('click', startWaterRitualAnimation);
+      btnReplayWater.addEventListener('click', () => {
+        // Reset to phase 0 briefly then run again
+        waterAnimBox.setAttribute('data-phase', '0');
+        waterRevealCard.classList.remove('shown');
+        waterRevealCard.style.display = 'none';
+        setTimeout(startWaterRitualAnimation, 200);
+      });
+
+      function spawnWaterSparkles() {
+        const boxRect = waterAnimBox.getBoundingClientRect();
+        const centerX = boxRect.left + boxRect.width * 0.5;
+        const centerY = boxRect.top + boxRect.height * 0.65;
+        for (let i = 0; i < 15; i++) {
+          particles.push({
+            x: centerX + (Math.random() - 0.5) * 40,
+            y: centerY + (Math.random() - 0.5) * 20,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: -Math.random() * 2 - 0.5,
+            size: Math.random() * 4 + 2,
+            color: '#70D6FF',
+            alpha: 1,
+            decay: 0.02 + Math.random() * 0.02
+          });
+        }
+      }
+
+      /* ======================================================================
+         7. WEB AUDIO API SYNTHESIZER (Celestial Ambience & Sound FX)
+         ====================================================================== */
+      function getAudioContext() {
+        if (!state.audioContext) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            state.audioContext = new AudioContextClass();
+          }
+        }
+        if (state.audioContext && state.audioContext.state === 'suspended') {
+          state.audioContext.resume();
+        }
+        return state.audioContext;
+      }
+
+      function playTone(freq, type, duration, gainValue = 0.15) {
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+          gain.gain.setValueAtTime(gainValue, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start();
+          osc.stop(ctx.currentTime + duration);
+        } catch (e) {
+          // Graceful ignore
+        }
+      }
+
+      function playCelestialChime() {
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          setTimeout(() => playTone(freq, 'sine', 1.8, 0.08), idx * 100);
+        });
+      }
+
+      function playChanniShimmerSound() {
+        const notes = [440, 554.37, 659.25, 880, 1108.73];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => playTone(freq, 'triangle', 2.2, 0.07), idx * 90);
+        });
+      }
+
+      function playWaterBloomChime() {
+        playTone(392.00, 'sine', 2.5, 0.1);
+        setTimeout(() => playTone(587.33, 'sine', 2.2, 0.08), 150);
+      }
+
+      function playWaterRippleSound() {
+        const notes = [800, 1100, 950, 1300];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => playTone(freq, 'sine', 0.4, 0.05), idx * 120);
+        });
+      }
+
+      function playWaterDrinkingSound() {
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(260, ctx.currentTime + 0.6);
+
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start();
+          osc.stop(ctx.currentTime + 0.6);
+
+          setTimeout(() => {
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(420, ctx.currentTime);
+            osc2.frequency.exponentialRampToValueAtTime(240, ctx.currentTime + 0.6);
+            gain2.gain.setValueAtTime(0.07, ctx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start();
+            osc2.stop(ctx.currentTime + 0.6);
+          }, 900);
+        } catch (e) { }
+      }
+
+      function playWarmHeartBloomSound() {
+        const chord = [329.63, 392.00, 493.88, 587.33, 783.99];
+        chord.forEach((freq, idx) => {
+          setTimeout(() => playTone(freq, 'sine', 3.5, 0.06), idx * 140);
+        });
+      }
+
+      function playRomanticChimeProgression() {
+        const progression = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.00];
+        progression.forEach((freq, idx) => {
+          setTimeout(() => playTone(freq, 'triangle', 1.4, 0.04), idx * 220);
+        });
+      }
+
+      // Ambient Celestial Harp Loop
+      const ambientBtn = document.getElementById('ambient-audio-btn');
+      ambientBtn.addEventListener('click', toggleAmbientMusic);
+
+      function toggleAmbientMusic() {
+        getAudioContext();
+        state.ambientMusicPlaying = !state.ambientMusicPlaying;
+        ambientBtn.classList.toggle('active', state.ambientMusicPlaying);
+
+        if (state.ambientMusicPlaying) {
+          startAmbientArpeggio();
+        } else {
+          stopAmbientArpeggio();
+        }
+      }
+
+      function startAmbientArpeggio() {
+        stopAmbientArpeggio();
+        const chordSeq = [
+          [220, 277.18, 329.63, 440, 554.37], // A Major
+          [185, 220, 277.18, 369.99, 440],    // F# Minor
+          [196, 246.94, 293.66, 392, 493.88], // G Major
+          [220, 277.18, 329.63, 440, 659.25]  // A Add9
+        ];
+        let chordIdx = 0;
+        let noteIdx = 0;
+
+        state.ambientInterval = setInterval(() => {
+          if (!state.ambientMusicPlaying) return;
+          const currentChord = chordSeq[chordIdx];
+          const freq = currentChord[noteIdx];
+          playTone(freq, 'sine', 3.2, 0.025);
+
+          noteIdx++;
+          if (noteIdx >= currentChord.length) {
+            noteIdx = 0;
+            chordIdx = (chordIdx + 1) % chordSeq.length;
+          }
+        }, 900);
+      }
+
+      function stopAmbientArpeggio() {
+        if (state.ambientInterval) {
+          clearInterval(state.ambientInterval);
+          state.ambientInterval = null;
+        }
+      }
+
+      /* ======================================================================
+         8. FULLSCREEN CANVAS: Stars, Falling Sakura, Golden Motes & Zenitsu Sparks
+         ====================================================================== */
+      const canvas = document.getElementById('ambient-canvas');
+      const ctx = canvas.getContext('2d');
+
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        initStars();
+      });
+
+      // Stars
+      const stars = [];
+      const numStars = Math.min(120, Math.floor((width * height) / 9000));
+
+      function initStars() {
+        stars.length = 0;
+        for (let i = 0; i < numStars; i++) {
+          stars.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 1.5 + 0.4,
+            alpha: Math.random() * 0.8 + 0.2,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleDir: Math.random() > 0.5 ? 1 : -1
+          });
+        }
+      }
+      initStars();
+
+      // Sakura Petals
+      const petals = [];
+      const numPetals = 28;
+
+      for (let i = 0; i < numPetals; i++) {
+        petals.push(createPetal(true));
+      }
+
+      function createPetal(randomY = false) {
+        return {
+          x: Math.random() * width,
+          y: randomY ? Math.random() * height : -20,
+          size: Math.random() * 9 + 8,
+          speedY: Math.random() * 0.9 + 0.6,
+          speedX: Math.random() * 0.8 - 0.4,
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 1.5,
+          wobble: Math.random() * 10,
+          wobbleSpeed: Math.random() * 0.04 + 0.02,
+          color: Math.random() > 0.4 ? '#FF9ECB' : '#FFD1E3',
+          opacity: Math.random() * 0.5 + 0.4
+        };
+      }
+
+      // Dynamic Burst Particles (for Channi lift & Water Offering)
+      const particles = [];
+
+      function spawnSakuraBurst(x, y, count = 20) {
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 4 + 1.5;
+          particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 1.2,
+            size: Math.random() * 8 + 6,
+            color: Math.random() > 0.5 ? '#FF9ECB' : '#FFD68A',
+            alpha: 1,
+            decay: 0.015 + Math.random() * 0.015,
+            rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 6
+          });
+        }
+      }
+
+      // Zenitsu Subtle Golden Lightning Accent
+      let lightningCounter = 0;
+      let lightningActive = false;
+      let lightningAlpha = 0;
+
+      function updateAndDrawCanvas() {
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Draw Twinkling Stars
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+          s.alpha += s.twinkleSpeed * s.twinkleDir;
+          if (s.alpha >= 1) {
+            s.alpha = 1;
+            s.twinkleDir = -1;
+          } else if (s.alpha <= 0.15) {
+            s.alpha = 0.15;
+            s.twinkleDir = 1;
+          }
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 244, 232, ${s.alpha})`;
+          ctx.shadowBlur = s.radius > 1 ? 6 : 0;
+          ctx.shadowColor = '#FFD68A';
+          ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+
+        // 2. Zenitsu Golden Sparkle/Lightning Accent (Rare & Elegant)
+        lightningCounter++;
+        if (lightningCounter > 420 && Math.random() < 0.015) {
+          lightningActive = true;
+          lightningAlpha = 0.45;
+          lightningCounter = 0;
+        }
+
+        if (lightningActive) {
+          ctx.save();
+          ctx.strokeStyle = `rgba(255, 214, 138, ${lightningAlpha})`;
+          ctx.lineWidth = 1.8;
+          ctx.shadowColor = '#FFD68A';
+          ctx.shadowBlur = 12;
+
+          ctx.beginPath();
+          let lx = width * 0.7 + (Math.random() - 0.5) * 60;
+          let ly = height * 0.1;
+          ctx.moveTo(lx, ly);
+          for (let step = 0; step < 4; step++) {
+            lx += (Math.random() - 0.5) * 35;
+            ly += Math.random() * 25 + 15;
+            ctx.lineTo(lx, ly);
+          }
+          ctx.stroke();
+          ctx.restore();
+
+          lightningAlpha -= 0.04;
+          if (lightningAlpha <= 0) {
+            lightningActive = false;
+          }
+        }
+
+        // 3. Falling Sakura Petals
+        for (let i = 0; i < petals.length; i++) {
+          const p = petals[i];
+          p.y += p.speedY;
+          p.wobble += p.wobbleSpeed;
+          p.x += p.speedX + Math.sin(p.wobble) * 0.7;
+          p.rotation += p.rotationSpeed;
+
+          if (p.y > height + 20) {
+            petals[i] = createPetal(false);
+          }
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+
+          ctx.beginPath();
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.opacity;
+
+          // Petal Heart/Tear shape
+          ctx.moveTo(0, 0);
+          ctx.bezierCurveTo(p.size / 2, -p.size / 2, p.size, p.size / 3, 0, p.size);
+          ctx.bezierCurveTo(-p.size, p.size / 3, -p.size / 2, -p.size / 2, 0, 0);
+          ctx.fill();
+
+          ctx.restore();
+        }
+
+        // 4. Dynamic Burst Particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const pt = particles[i];
+          pt.x += pt.vx;
+          pt.y += pt.vy;
+          pt.alpha -= pt.decay;
+
+          if (pt.alpha <= 0) {
+            particles.splice(i, 1);
+            continue;
+          }
+
+          ctx.save();
+          ctx.translate(pt.x, pt.y);
+          if (pt.rotation !== undefined) {
+            pt.rotation += pt.rotSpeed;
+            ctx.rotate((pt.rotation * Math.PI) / 180);
+          }
+
+          ctx.beginPath();
+          ctx.arc(0, 0, pt.size, 0, Math.PI * 2);
+          ctx.fillStyle = pt.color;
+          ctx.globalAlpha = pt.alpha;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = pt.color;
+          ctx.fill();
+          ctx.restore();
+        }
+
+        requestAnimationFrame(updateAndDrawCanvas);
+      }
+
+      requestAnimationFrame(updateAndDrawCanvas);
+
+      // Safe initialization for staged entrance reveal
+      if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', () => handleSceneEntry(1));
+      } else {
+        handleSceneEntry(1);
+      }
+    })();
+  </script>
+</body>
+</html>
